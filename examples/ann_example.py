@@ -12,6 +12,7 @@ import utilities as ut
 import rbo_min_hash as rmh
 
 def ann():
+    #TODO: riscrivi questo
     """This example loads a directory containing rankings, then selects a query
     ranking and computes its k nearest neighbors according to the probability
     of hash collisions with the loaded files, using the LSH scheme RBOMinHash 
@@ -37,53 +38,61 @@ def ann():
     with open("ann_parameters.json", "r") as file:
         params = json.load(file)
     directory=Path(params["directory"])
-    
-    rankings=ut.load_rankings(directory)           #List of the rankings
-    
+    loaded=ut.load_rankings(directory)           #List of the rankings
     #LSH scheme creation
-    matrix=rmh.RBOMinHash(params["p"], params["perm_len"], 
-                          params["num_hashes"])  
-    
-    signatures=dict()   #Key:filename, Value:hashes
+    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], params['seed'])  
     translator=dict()   #Dict used to encode strings
     
     # Start counting building time for experiments
-    start_building = time.perf_counter()  
-
-    #Computation of the hashes
-    for file in rankings.keys():
-        ranking=rankings[file]
-        file_int = all(isinstance(x, int) for x in ranking)
-        if not file_int:    #Then it needs to be encoded
-            ranking=ut.encode_ranking(ranking,translator)
-        signatures[file] = matrix.copy()    #Create new instance of the scheme
-        signatures[file].update(ranking)    #Inserts the ranking, so to hash it
+    start_building = time.perf_counter()
     
+    rankings=dict()
+    for file in loaded.keys():
+        rank=loaded[file]
+        rank_int = all(isinstance(x, int) for x in rank)
+        if not rank_int:
+            rank=ut.encode_ranking(rank, translator)
+        rankings[file]=rank
+        lsh.add_ranking(rank)
+
+    query=rankings[params['query']]
+    
+    query_index=params['query'].replace("file","")
+    query_index=int(query_index.replace(".txt",""))
+         
     end_building = time.perf_counter()
     build_time = end_building - start_building
+
+    #Computation of p. of hash collision between query and each other file
+    neighbors=lsh.nearest_neighbors(query, params['num_neighbors']+1)
+    res=[]
+    for elm in neighbors:
+        if elm[1]==query_index:
+            continue
+        for i,file in enumerate(rankings.keys()):
+            if i == elm[1]:
+                res.append(file)
+                break
+        
+    actual_neighbors=rmh.exact_nearest_neighbor(list(rankings.values()), query,
+                                        params['p'], params['num_neighbors']+1)
+    actual_res=[]
+    for elm in actual_neighbors:
+        if elm[1]==query_index:
+            continue
+        for i,file in enumerate(rankings.keys()):
+            if i == elm[1]:
+                actual_res.append(file)
+                break
     
     distances=dict()    #For each file, p. of collision with query file
-    ratios=dict()       #For each file, ratio p. of collision/actual RBO sim.
-    
-    #Computation of p. of hash collision between query and each other file
-    for file in signatures.keys():
-        if params["skip_query_file"] and file==params["query"]:
-            continue
-        distances[file]=signatures[params["query"]].rbo(signatures[file])
-        ratios[file]=distances[file]   #Later it will compute RBO and the ratio
-    res=ut.top_keys(distances, params["num_neighbors"])
-    
-    #Same as before with actual RBO similarity
-    actual_distances=dict()     
-    for file in signatures.keys():
-        if params["skip_query_file"] and file==params["query"]:
-            continue
-        actual_distances[file]=rmh.rbo_sim(
-            ut.encode_ranking(rankings[file],translator), 
-            ut.encode_ranking(rankings[params["query"]],translator), 
-            p=params["p"])
-        ratios[file]/=actual_distances[file]
-    actual_res=ut.top_keys(actual_distances, params["num_neighbors"])
+    actual_distances=dict()       #For each file, ratio p. of collision/actual RBO sim.
+    ratios=dict()
+    lsh.add_ranking(query)
+    for i,file in enumerate(rankings.keys()):
+        distances[file]=lsh.get_rbo_similarity_by_index(i, -1)
+        actual_distances[file]=rmh.rbo_sim(query, rankings[file], p=params['p'])
+        ratios[file]=distances[file]/actual_distances[file]
     
     precision=0
     for i in range(params['num_neighbors']):
@@ -127,7 +136,7 @@ def eg1():
     #Print of the results
     print(f"QUERY FILE: {params['query']}")
     print("PARAMETERS:\n")
-    print(f"Persistence: {params['p']}\nLength of permutation: {params['perm_len']}\nNumber of values in the hash: {params['num_hashes']}")
+    print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
     
     print(f"\nAPPROXIMATE NEAREST {params['num_neighbors']} NEIGHBORS FOR {params['query']}:\n")
     for i in range(params['num_neighbors']):

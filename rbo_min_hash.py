@@ -1,12 +1,91 @@
-
-from __future__ import annotations
-from typing import TYPE_CHECKING, Callable, Optional
-if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
-import random
+import numpy as np 
 from mpmath import nsum, inf
-import numpy as np
 
+class RBO_LSH:
+    def __init__(self, p, num_hashes, seed):
+        assert 0 < p < 1 and num_hashes > 0
+
+        #random generator for reproducibility
+        self.rand_gen = np.random.default_rng(seed)
+
+        # extract num_hashes functions from the LSH scheme (these are parametrized by d and r)
+        self.d = list(self.rand_gen.geometric(1 - p, size=num_hashes))
+        self.r = [{} for _ in range(num_hashes)]
+        self.num_hashes = num_hashes
+
+        # List of hashed ranking
+        # Specifically, ranking_dataset[i] contains a list of self.num_hashes numbers corresponding to one value for each function extracted from the LSH
+        self.ranking_dataset = [] 
+        
+        
+    def get_ranking_hash(self, ranking):
+        # we assume ranking is a list of hashable values (e.g., integers)
+        hashed_ranking = []
+        for hash_iter in range(self.num_hashes):
+            min_val = None
+            
+            for i in range(min(len(ranking), self.d[hash_iter])):
+                if ranking[i] not in self.r[hash_iter]:
+                    #should we generate a random integer within a very large range? like [1, (1/(1-p))**2] or larger
+                    #this would help numerical stability
+                    self.r[hash_iter][ranking[i]] = self.rand_gen.random() 
+                if min_val is None or self.r[hash_iter][ranking[i]] < min_val:
+                    min_val = self.r[hash_iter][ranking[i]]
+                
+            #NOTE: if the ranking is smaller than d, we are stopping earlier. This is slightly different than the theoretical algorithm
+            #Not sure if we want to make this closer to theory, or whether this variant is reasonable in practice
+            
+            hashed_ranking.append(min_val)
+
+        #Note: we might store this as a numpy array rather than a Python list and we can compute distances more efficiently
+        return hashed_ranking
+
+    def get_rbo_similarity(self, h1, h2):
+        #returns rbo similarity given hashes h1 and h2 for two rankings
+        
+        #Note: implementing h1 and h2 as numpy array would simplify this and make it faster
+        assert len(h1) == len(h2)
+
+        k = len(h1)
+        cumulative = 0
+        for i in range(k):
+            if h1[i] == h2[i]: #these are values in (0,1), should we do something like abs(h1[i] - h2[i]) < eps? (say, with eps=0.00001) --- I think this would be more numerically stable
+                cumulative += 1
+        return cumulative / k
+    
+    def get_rbo_similarity_by_index(self, i1, i2):
+        #returns rbo similarity given hashes h1 and h2 for two rankings
+        
+        h1=self.ranking_dataset[i1]
+        h2=self.ranking_dataset[i2]
+        
+        #Note: implementing h1 and h2 as numpy array would simplify this and make it faster
+        assert len(h1) == len(h2)
+
+        k = len(h1)
+        cumulative = 0
+        for i in range(k):
+            if h1[i] == h2[i]: #these are values in (0,1), should we do something like abs(h1[i] - h2[i]) < eps? (say, with eps=0.00001) --- I think this would be more numerically stable
+                cumulative += 1
+        return cumulative / k
+
+    def add_ranking(self, ranking):
+        hashed_ranking = self.get_ranking_hash(ranking)
+        self.ranking_dataset.append(hashed_ranking)
+
+    def nearest_neighbors(self, query, k):
+        #returns (approximately) k-closest rankings to the query
+
+        #TODO: make this function faster!
+
+        hash_query = self.get_ranking_hash(query)
+        similarity_idx_pair = []
+        for i, hash_ranking in enumerate(self.ranking_dataset): #linear scan for testing purposes
+            sim = self.get_rbo_similarity(hash_query, hash_ranking)
+            similarity_idx_pair.append( (sim, i) )
+        
+        return sorted(similarity_idx_pair, reverse=True)[:k]
+    
 
 #computes the RBO similarity between lists x and y
 def rbo_sim(x, y, p=0.9, k=None):
@@ -28,195 +107,51 @@ def rbo_sim(x, y, p=0.9, k=None):
     cumulative += float(nsum(lambda d: p**(d-1)*(final_int+d-k)/d, [k+1, inf]))
     return (1 - p) * cumulative
 
-#Computes the hash of a ranking x given:
-#   -d: depth of evaluation of x (it will be truncated at depth d)
-#   -r: random sequence used to determine the hash
-#The values are passed all together as a list since in this library
-#   hash functions have just one input value
-def _hash_RBO(xdr):
-    x=xdr[0]
-    d=xdr[1]
-    r=xdr[2]
-    if d<len(x):
-        x=x[:d]            #truncate x if long enough
-    res=[]
-    for i in x:
-        if i<len(r):
-            res.append(r[i])
-    if not res:
-        res=[1]
-    return min(res)
+def exact_nearest_neighbor(ranking_datasets, ranking_query, p, k):
+    similarity_idx_pair = []
+    for i, rd in enumerate(ranking_datasets):
+        sim = rbo_sim(rd, ranking_query, p=p)
+        similarity_idx_pair.append( (sim, i) )
 
+    return sorted(similarity_idx_pair, reverse=True)[:k]
 
+if __name__ == '__main__':
+    # QUICK AND DIRTY TESTING
 
-class RBOMinHash:
-    """RBOMinHash is a probabilistic data structure for estimating
-    RBO similarity between rankings.
+    # generate some random rankings
+    rnd = np.random.default_rng(42)
+    num_rankings = 500
+    num_queries = 10
+    ranking_len = 1000
+    p = 0.9
+    ranking_dataset = [rnd.permutation(np.arange(ranking_len)).tolist() for _ in range(num_rankings)] #generate random permutation of {1,...,ranking_len} as a ranking
+    queries = [rnd.permutation(np.arange(ranking_len)).tolist() for _ in range(num_queries)]
 
-    Args:
-        p (float): the persistence of the model
-        perm_len (int): the length of the permutation to be used to compute 
-            the hash
-        num_hashes (int): The number of different hash function to use on each 
-            element
-        hashfunc (Callable): The hash function used by
-            this MinHash.
-            It takes the input passed to the :meth:`update` method and
-            returns a float.
-        r
-        d
-        hashvalues (Optional[Iterable]): The hash values is
-            the internal state of the MinHash. It can be specified for faster
-            initialization using the existing :attr:`hashvalues` of another MinHash.
-    """
-    def __init__(
-        self,
-        p: float,
-        perm_len: int,
-        num_hashes: int,
-        hashfunc: Callable = _hash_RBO,
-        r: Optional[ArrayLike] = None,
-        d: Optional[ArrayLike] = None,
-        hashvalues: Optional[ArrayLike] = None,
-    ) -> None:
-        if hashvalues is not None:
-            num_hashes = len(hashvalues)
-        # Check the hash function.
-        if not callable(hashfunc):
-            raise ValueError("The hashfunc must be a callable.")
-        self.hashfunc = hashfunc
-        # Initialize hash values
-        if hashvalues is not None:
-            self.hashvalues = hashvalues
-        else:
-            self.hashvalues=[]
-        
-        #Just added the following attributes
-        self.p=p
-        self.perm_len=perm_len
-        self.num_hashes=num_hashes
-        
-        if r is None and d is None:
-            self.r=[]
-            self.d=[]
-            for _ in range(self.num_hashes):
-                self.r.append([random.random() for _ in range(self.perm_len)])
-                self.d.append(np.random.geometric(1-self.p))
-        else:
-            self.r=r
-            self.d=d
-
-    def update(self, b) -> None:
-        """Update this RBOMinHash with a new value.
-        The value will be hashed using the hash function specified by
-        the `hashfunc` argument in the constructor.
-
-        Args:
-            b: The value to be hashed using the hash function specified.
-
-        """
-         
-        for i in range(self.num_hashes):
-            tmp_r = self.r[i]
-            tmp_d = self.d[i]
-            tmp=[b,tmp_d,tmp_r] #parse input
-            self.hashvalues.append(self.hashfunc(tmp))
-
-    def rbo(self, other: RBOMinHash) -> float:
-        """Estimate the `RBO similarity`_ (resemblance) between the sets
-        represented by this RBOMinHash and the other. It does so by computing 
-        the probability of collisions of the two hashes
-
-        Args:
-            other (RBOMinHash): The other RBOMinHash.
-
-        Returns:
-            float: The probability of hash collisions.
-
-        Raises:
-            ValueError: If the two RBOMinHashes have different numbers of
-                hash functions.
-
-        """
-        if len(self) != len(other):
-            raise ValueError(
-                "Cannot compute RBO given RBOMinHash with\
-                    different numbers of permutation functions"
-            )
-        
-        # k=min(len(self.hashvalues),len(other.hashvalues))
-        k=len(self.hashvalues)
-        cumulative=0
-        for i in range(k):
-            if(self.hashvalues[i]==other.hashvalues[i]):
-                cumulative+=1
-        return cumulative/k
-
-    def merge(self, other: RBOMinHash) -> None:
-        """Merge the other RBOMinHash with this one, making this one the union
-        of both.
-
-        Args:
-            other (RBOMinHash): The other RBOMinHash.
-
-        Raises:
-            ValueError: If the two RBOMinHashes have different numbers of
-                hash functions.
-
-        """
-        if len(self) != len(other):
-            raise ValueError(
-                "Cannot merge RBOMinHash with\
-                    different numbers of permutation functions"
-            )
-        self.hashvalues = np.minimum(other.hashvalues, self.hashvalues)
-
-    def is_empty(self) -> bool:
-        """Returns:
-        bool: If the current RBOMinHash is empty - at the state of just
-            initialized.
-
-        """
-        return not self.hashvalues
-
-    def clear(self) -> None:
-        """Clear the current state of the RBOMinHash.
-        All hash values are reset.
-        """
-        self.hashvalues = []
-
-    def copy(self) -> RBOMinHash:
-        """Return a copy"""
-        return RBOMinHash(            
-            p=self.p,
-            perm_len=self.perm_len,
-            num_hashes=self.num_hashes,
-            hashfunc=self.hashfunc,
-            r=self.r,
-            d=self.d
-        )
-
-    def __len__(self) -> int:
-        """Returns:
-        int: The number of hash values.
-
-        """
-        return len(self.hashvalues)
-
-    def __eq__(self, other: RBOMinHash) -> bool:
-        """Returns:
-        bool: If their hash values are both equal then two are equivalent.
-
-        """
-        return (
-            type(self) is type(other) and np.array_equal(self.hashvalues, other.hashvalues)
-        )
-
+    #build LSH
+    num_hashes = 200
+    lsh = RBO_LSH(p, num_hashes, 74)
+    for ranking in ranking_dataset:
+        lsh.add_ranking(ranking)
     
+    # evaluate queries:
+    k = 3 #top-3
 
+    for i, query in enumerate(queries):
+        lsh_response = lsh.nearest_neighbors(query, k)
+        exact_response = exact_nearest_neighbor(ranking_dataset, query, p, k)
 
-    
-
+        print(f'Query #{i}')
+        print('LSH response: ', lsh_response)
+        print('Exact response: ', exact_response)
+        print()
     
     
+    # lsh=RBO_LSH(0.9,100,42)
+    # lsh.add_ranking([1,2,3,4,5])
+    # lsh.add_ranking([1,2,3,4,5])
+    # print(lsh.get_rbo_similarity_by_index(0, 1))
+    # print(rbo_sim([1,2,3,4,5],[1,2,3,4,5],0.9))
     
+    data1=["ciao", "sono", "davide"]
+    data2=["ciao", "sono", "davide"]
+    print(rbo_sim(data1,data2))

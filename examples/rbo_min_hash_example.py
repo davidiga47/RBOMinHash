@@ -43,8 +43,7 @@ def eg1():
     print_data2=data2
         
     # Create the LSH scheme
-    m1 = rmh.RBOMinHash(params["p"],params["perm_len"],params["num_hashes"])
-    m2 = m1.copy()
+    lsh = rmh.RBO_LSH(params["p"],params["num_hashes"],params["seed"])
     
     # If needed encodes the rankings
     translator=dict()
@@ -56,13 +55,14 @@ def eg1():
         data2=ut.encode_ranking(data2,translator)
         
     # Hashing of the rankings
-    m1.update(data1)
-    m2.update(data2)
+    lsh.add_ranking(data1)
+    lsh.add_ranking(data2)
+    # print(lsh.nearest_neighbors(data1, 2))
     
     #Print of the results
-    print(f"Persistence: {params['p']}\nLength of permutation: {params['perm_len']}\nNumber of values in the hash: {params['num_hashes']}")
+    print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
     print(f"\ndata1: {print_data1}\ndata2: {print_data2}")
-    p_collisions=m1.rbo(m2)
+    p_collisions=lsh.get_rbo_similarity_by_index(0, 1)
     print("\nEstimated probability of hashes collision for data1 and data2 is", p_collisions)
     actual_rbo = rmh.rbo_sim(data1, data2, p=params["p"])
     print("RBO similarity for data1 and data2 is", actual_rbo)
