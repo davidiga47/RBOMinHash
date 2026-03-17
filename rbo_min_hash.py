@@ -1,5 +1,6 @@
 import numpy as np 
 from mpmath import nsum, inf
+import heapq
 
 class RBO_LSH:
     def __init__(self, p, num_hashes, seed):
@@ -72,19 +73,15 @@ class RBO_LSH:
     def add_ranking(self, ranking):
         hashed_ranking = self.get_ranking_hash(ranking)
         self.ranking_dataset.append(hashed_ranking)
-
+    
     def nearest_neighbors(self, query, k):
-        #returns (approximately) k-closest rankings to the query
-
-        #TODO: make this function faster!
-
         hash_query = self.get_ranking_hash(query)
-        similarity_idx_pair = []
-        for i, hash_ranking in enumerate(self.ranking_dataset): #linear scan for testing purposes
-            sim = self.get_rbo_similarity(hash_query, hash_ranking)
-            similarity_idx_pair.append( (sim, i) )
-        
-        return sorted(similarity_idx_pair, reverse=True)[:k]
+        get_sim = self.get_rbo_similarity
+    
+        return heapq.nlargest(
+            k,
+            ((get_sim(hash_query, hr), i) for i, hr in enumerate(self.ranking_dataset))
+        )
     
 
 #computes the RBO similarity between lists x and y
@@ -144,14 +141,3 @@ if __name__ == '__main__':
         print('LSH response: ', lsh_response)
         print('Exact response: ', exact_response)
         print()
-    
-    
-    # lsh=RBO_LSH(0.9,100,42)
-    # lsh.add_ranking([1,2,3,4,5])
-    # lsh.add_ranking([1,2,3,4,5])
-    # print(lsh.get_rbo_similarity_by_index(0, 1))
-    # print(rbo_sim([1,2,3,4,5],[1,2,3,4,5],0.9))
-    
-    data1=["ciao", "sono", "davide"]
-    data2=["ciao", "sono", "davide"]
-    print(rbo_sim(data1,data2))

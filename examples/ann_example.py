@@ -12,7 +12,6 @@ import utilities as ut
 import rbo_min_hash as rmh
 
 def ann():
-    #TODO: riscrivi questo
     """This example loads a directory containing rankings, then selects a query
     ranking and computes its k nearest neighbors according to the probability
     of hash collisions with the loaded files, using the LSH scheme RBOMinHash 
@@ -20,11 +19,9 @@ def ann():
     
     PARAMETERS:
         p: User's persistence
-        perm_len: Length of the permutation r used during hashing
         num_hashes: Number of different hash functions used to hash a ranking
         num_neighbors: Number of neighbors to compute for the query
         query: File containing the query ranking
-        skip_query_file: If true skips the query file while computing neighbors
         directory: The directory from which to load the rankings
 
     """
@@ -47,13 +44,17 @@ def ann():
     start_building = time.perf_counter()
     
     rankings=dict()
+    hashing_time=0
     for file in loaded.keys():
         rank=loaded[file]
         rank_int = all(isinstance(x, int) for x in rank)
         if not rank_int:
             rank=ut.encode_ranking(rank, translator)
         rankings[file]=rank
+        start_hashing=time.perf_counter()
         lsh.add_ranking(rank)
+        end_hashing=time.perf_counter()
+        hashing_time += (end_hashing - start_hashing)
 
     query=rankings[params['query']]
     
@@ -64,7 +65,10 @@ def ann():
     build_time = end_building - start_building
 
     #Computation of p. of hash collision between query and each other file
+    start_querying=time.perf_counter()
     neighbors=lsh.nearest_neighbors(query, params['num_neighbors']+1)
+    end_querying=time.perf_counter()
+    query_time_lsh=end_querying-start_querying
     res=[]
     for elm in neighbors:
         if elm[1]==query_index:
@@ -74,8 +78,11 @@ def ann():
                 res.append(file)
                 break
         
+    start_querying=time.perf_counter()
     actual_neighbors=rmh.exact_nearest_neighbor(list(rankings.values()), query,
                                         params['p'], params['num_neighbors']+1)
+    end_querying=time.perf_counter()
+    query_time_rbo=end_querying-start_querying
     actual_res=[]
     for elm in actual_neighbors:
         if elm[1]==query_index:
@@ -107,8 +114,19 @@ def ann():
     
     mem_use=process.memory_info().rss / 1024**2
     
-    return (precision, recall, avg_ratio, build_time, elapsed_time, mem_use, 
-            res, actual_res, distances, actual_distances)
+    return (precision, 
+            recall,
+            avg_ratio,
+            build_time,
+            elapsed_time,
+            query_time_lsh,
+            query_time_rbo,
+            hashing_time,
+            mem_use, 
+            res,
+            actual_res,
+            distances,
+            actual_distances)
 
 def eg1():   
     
@@ -122,11 +140,14 @@ def eg1():
     avg_ratio=ann_exp[2]
     build_time=ann_exp[3]
     elapsed_time=ann_exp[4]
-    mem_use=ann_exp[5]
-    res=ann_exp[6]
-    actual_res=ann_exp[7]
-    distances=ann_exp[8]
-    actual_distances=ann_exp[9]
+    query_time_lsh=ann_exp[5]
+    query_time_rbo=ann_exp[6]
+    hashing_time=ann_exp[7]
+    mem_use=ann_exp[8]
+    res=ann_exp[9]
+    actual_res=ann_exp[10]
+    distances=ann_exp[11]
+    actual_distances=ann_exp[12]
     
     
     #Fetching of the parameters
@@ -149,9 +170,12 @@ def eg1():
     print(f"\nPRECISION: {precision}")    
     print(f"RECALL: {recall}")
     print(f"AVERAGE RATIO P.COLLISION/RBO: {avg_ratio}")
-    print(f"\nBUILDING TIME OF THE LSH SCHEMES: {build_time:.6f} seconds")
+    print(f"\nBUILDING TIME OF THE LSH SCHEME: {build_time:.6f} seconds")
+    print(f"HASHING TIME: {hashing_time:.6f} seconds")
+    print(f"QUERY TIME FOR THE LSH SCHEME: {query_time_lsh:.6f} seconds")
+    print(f"QUERY TIME FOR THE ACTUAL RBO: {query_time_rbo:.6f} seconds")
     print(f"TOTAL ELAPSED TIME: {elapsed_time:.6f} seconds")
-    print(f"MEMORY UTILIZATION: {mem_use:.2f} MB")
+    print(f"\nMEMORY UTILIZATION: {mem_use:.2f} MB")
     
     print("\n")
     
