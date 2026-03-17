@@ -1,0 +1,22 @@
+{
+    "p": 0.9,
+    "perm_len": 4000,
+    "num_hashes": 100,
+    "num_neighbors": 5,
+    "query": "file42.txt",
+    "skip_query_file": true,
+    "directory": "./docs",
+    "num_runs": 20,
+    "multi_query": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+    ]
+}
