@@ -2,6 +2,8 @@ import numpy as np
 from mpmath import nsum, inf
 import heapq
 
+eps=1e-5
+
 class RBO_LSH:
     def __init__(self, p, num_hashes, seed):
         assert 0 < p < 1 and num_hashes > 0
@@ -50,7 +52,8 @@ class RBO_LSH:
         k = len(h1)
         cumulative = 0
         for i in range(k):
-            if h1[i] == h2[i]: #these are values in (0,1), should we do something like abs(h1[i] - h2[i]) < eps? (say, with eps=0.00001) --- I think this would be more numerically stable
+            if abs(h1[i] - h2[i]) < eps:
+            # if h1[i] == h2[i]: 
                 cumulative += 1
         return cumulative / k
     
@@ -66,7 +69,8 @@ class RBO_LSH:
         k = len(h1)
         cumulative = 0
         for i in range(k):
-            if h1[i] == h2[i]: #these are values in (0,1), should we do something like abs(h1[i] - h2[i]) < eps? (say, with eps=0.00001) --- I think this would be more numerically stable
+            if abs(h1[i] - h2[i]) < eps:
+            # if h1[i] == h2[i]: 
                 cumulative += 1
         return cumulative / k
 
