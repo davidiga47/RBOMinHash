@@ -36,6 +36,7 @@ def ann():
         params = json.load(file)
     directory=Path(params["directory"])
     loaded=ut.load_rankings(directory)           #List of the rankings
+    
     #LSH scheme creation
     lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], params['seed'])  
     translator=dict()   #Dict used to encode strings
@@ -43,6 +44,7 @@ def ann():
     # Start counting building time for experiments
     start_building = time.perf_counter()
     
+    #Encoding and hashing of the rankings
     rankings=dict()
     hashing_time=0
     for file in loaded.keys():
@@ -56,16 +58,16 @@ def ann():
         end_hashing=time.perf_counter()
         hashing_time += (end_hashing - start_hashing)
 
+    #Isolation of the query ranking
     query=rankings[params['query']]
-    
     query_index=params['query'].replace("file","")
     query_index=int(query_index.replace(".txt",""))
          
     end_building = time.perf_counter()
     build_time = end_building - start_building
-
-    #Computation of p. of hash collision between query and each other file
     start_querying=time.perf_counter()
+    
+    #Computation of k nearest neighbors using LSH
     neighbors=lsh.nearest_neighbors(query, params['num_neighbors']+1)
     end_querying=time.perf_counter()
     query_time_lsh=end_querying-start_querying
@@ -77,7 +79,8 @@ def ann():
             if i == elm[1]:
                 res.append(file)
                 break
-        
+    
+    #Computation of k nearest neighbors using RBO
     start_querying=time.perf_counter()
     actual_neighbors=rmh.exact_nearest_neighbor(list(rankings.values()), query,
                                         params['p'], params['num_neighbors']+1)
@@ -92,15 +95,16 @@ def ann():
                 actual_res.append(file)
                 break
     
-    distances=dict()    #For each file, p. of collision with query file
-    actual_distances=dict()       #For each file, ratio p. of collision/actual RBO sim.
-    ratios=dict()
+    distances=dict()        #For each file, p. of collision with query file
+    actual_distances=dict() #For each file, RBO similarity with query file     
+    ratios=dict()           #For each file, ratio p. of collision/actual RBO sim.
     lsh.add_ranking(query)
     for i,file in enumerate(rankings.keys()):
         distances[file]=lsh.get_rbo_similarity_by_index(i, -1)
         actual_distances[file]=rmh.rbo_sim(query, rankings[file], p=params['p'])
         ratios[file]=distances[file]/actual_distances[file]
     
+    #Metrics 
     precision=0
     for i in range(params['num_neighbors']):
         if res[i]==actual_res[i]:
@@ -111,7 +115,6 @@ def ann():
     
     end_elapsed = time.perf_counter()
     elapsed_time = end_elapsed - start_elapsed
-    
     mem_use=process.memory_info().rss / 1024**2
     
     return (precision, 
