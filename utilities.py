@@ -4,11 +4,6 @@ import string
 import random
 import json
 
-#Given a dictionary d, returns the keys of the top n values
-def top_keys(d, n):
-    return [k for k, v in sorted(d.items(),
-                                 key=lambda x: x[1], reverse=True)[:n]]
-
 #Encodes a list of non-integer values to a list of integer values
 def encode_ranking(r, translator, case_sensitive=False):
     res=[]
@@ -52,10 +47,7 @@ def generate_lists(lists_length, lists_intersection, max_value):
     l2 = common + rem2
     random.shuffle(l1)
     random.shuffle(l2)
-    print(l1)
-    print("\n")
-    print(l2)
-    #print(len(set(l1)&set(l2)))
+    return (l1,l2)
     
 def update_json(file, key, value):
     with open(file) as f:
