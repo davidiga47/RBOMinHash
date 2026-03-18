@@ -3,7 +3,7 @@
     "perm_len": 4000,
     "seed": 42,
     "num_hashes": 100,
-    "num_neighbors": 4,
+    "num_neighbors": 5,
     "query": "file42.txt",
     "skip_query_file": true,
     "directory": "./docs",
