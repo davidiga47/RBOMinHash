@@ -40,22 +40,11 @@ class RBO_LSH:
             
             hashed_ranking.append(min_val)
 
-        #Note: we might store this as a numpy array rather than a Python list and we can compute distances more efficiently
-        return hashed_ranking
+        return np.array(hashed_ranking)
 
     def get_rbo_similarity(self, h1, h2):
-        #returns rbo similarity given hashes h1 and h2 for two rankings
-        
-        #Note: implementing h1 and h2 as numpy array would simplify this and make it faster
         assert len(h1) == len(h2)
-
-        k = len(h1)
-        cumulative = 0
-        for i in range(k):
-            if abs(h1[i] - h2[i]) < eps:
-            # if h1[i] == h2[i]: 
-                cumulative += 1
-        return cumulative / k
+        return np.mean(np.abs(h1 - h2) < eps)
     
     def get_rbo_similarity_by_index(self, i1, i2):
         #returns rbo similarity given hashes h1 and h2 for two rankings
@@ -63,16 +52,8 @@ class RBO_LSH:
         h1=self.ranking_dataset[i1]
         h2=self.ranking_dataset[i2]
         
-        #Note: implementing h1 and h2 as numpy array would simplify this and make it faster
         assert len(h1) == len(h2)
-
-        k = len(h1)
-        cumulative = 0
-        for i in range(k):
-            if abs(h1[i] - h2[i]) < eps:
-            # if h1[i] == h2[i]: 
-                cumulative += 1
-        return cumulative / k
+        return np.mean(np.abs(h1 - h2) < eps)
 
     def add_ranking(self, ranking):
         hashed_ranking = self.get_ranking_hash(ranking)
@@ -82,10 +63,8 @@ class RBO_LSH:
         hash_query = self.get_ranking_hash(query)
         get_sim = self.get_rbo_similarity
     
-        return heapq.nlargest(
-            k,
-            ((get_sim(hash_query, hr), i) for i, hr in enumerate(self.ranking_dataset))
-        )
+        return heapq.nlargest(k, ((get_sim(hash_query, hr), i) 
+                                 for i, hr in enumerate(self.ranking_dataset)))
     
 
 #computes the RBO similarity between lists x and y
