@@ -3,7 +3,6 @@ import json
 import ann_example as ann
 
 def run_experiment():
-    
     with open("ann_parameters.json", "r") as file:
         params = json.load(file)
     
@@ -40,6 +39,7 @@ def eg1():
     print(f"TOTAL ELAPSED TIME: {(res[4] * params['num_runs']):.6f} seconds")
     print(f"\nMEAN MEMORY UTILIZATION: {res[8]:.2f} MB")
     print("\n")
+    
     
 if __name__=="__main__":
     eg1()

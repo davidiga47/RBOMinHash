@@ -4,7 +4,7 @@
     "seed": 42,
     "num_hashes": 100,
     "num_neighbors": 5,
-    "query": "file42.txt",
+    "query": "file07.txt",
     "skip_query_file": true,
     "directory": "./docs",
     "num_runs": 20,
