@@ -104,14 +104,16 @@ def ann():
     precision/=params["num_neighbors"]
     recall=len(set(res) & set(actual_res))/params['num_neighbors']
     
-    distances=dict()        #For each file, p. of collision with query file
-    actual_distances=dict() #For each file, RBO similarity with query file     
+    # distances=dict()        #For each file, p. of collision with query file
+    # actual_distances=dict() #For each file, RBO similarity with query file     
     ratios=dict()           #For each file, ratio p. of collision/actual RBO sim.
     lsh.add_ranking(query)
     for i,file in enumerate(rankings.keys()):
-        distances[file]=lsh.get_rbo_similarity_by_index(i, -1)
-        actual_distances[file]=rmh.rbo_sim(query, rankings[file], p=params['p'])
-        ratios[file]=distances[file]/actual_distances[file]
+        ratios[file]=lsh.get_rbo_similarity_by_index(i, -1)
+        ratios[file]/=rmh.rbo_sim(query, rankings[file], p=params['p'])
+        # distances[file]=lsh.get_rbo_similarity_by_index(i, -1)
+        # actual_distances[file]=rmh.rbo_sim(query, rankings[file], p=params['p'])
+        # ratios[file]=distances[file]/actual_distances[file]
     avg_ratio=np.mean(np.array(list(ratios.values())))
     
     end_elapsed = time.perf_counter()
@@ -127,9 +129,9 @@ def ann():
             hashing_time,
             mem_use, 
             res,
-            actual_res,
-            distances,
-            actual_distances
+            actual_res
+            # distances,
+            # actual_distances
             )
 
 def eg1():   
@@ -150,8 +152,8 @@ def eg1():
     mem_use=ann_exp[8]
     res=ann_exp[9]
     actual_res=ann_exp[10]
-    distances=ann_exp[11]
-    actual_distances=ann_exp[12]
+    # distances=ann_exp[11]
+    # actual_distances=ann_exp[12]
     
     
     #Fetching of the parameters
@@ -165,11 +167,13 @@ def eg1():
     
     print(f"\nAPPROXIMATE NEAREST {params['num_neighbors']} NEIGHBORS FOR {params['query']}:\n")
     for i in range(params['num_neighbors']):
-        print(f"{i+1}: {res[i]} | DISTANCE: {distances[res[i]]}")
+        print(f"{i+1}: {res[i]}")
+        # print(f"{i+1}: {res[i]} | DISTANCE: {distances[res[i]]}")
         
     print(f"\nNEAREST {params['num_neighbors']} NEIGHBORS FOR {params['query']}:\n")
     for i in range(params['num_neighbors']):
-        print(f"{i+1}: {actual_res[i]} | DISTANCE: {actual_distances[actual_res[i]]}")
+        print(f"{i+1}: {actual_res[i]}")
+        # print(f"{i+1}: {actual_res[i]} | DISTANCE: {actual_distances[actual_res[i]]}")
     
     print(f"\nPRECISION: {precision}")    
     print(f"RECALL: {recall}")
