@@ -1,6 +1,7 @@
 
 import json
 import ann_example as ann
+import sys
 
 def run_experiment():
     with open("ann_parameters.json", "r") as file:
@@ -8,6 +9,7 @@ def run_experiment():
     
     res = [0 for _ in range(9)]
     for i in range(params['num_runs']):
+        print(f"Run #{i+1}")
         tmp = ann.ann()
         for j in range(9):
             res[j] = (res[j] * i + tmp[j]) / (i+1)
@@ -15,9 +17,14 @@ def run_experiment():
     return res
     
     
-def eg1():
+def eg1(out=None):
     
     res = run_experiment()
+    
+    if out is not None:
+        original_stdout=sys.stdout
+        sys.stdout=out
+    
     with open("ann_parameters.json", "r") as file:
         params = json.load(file)
     
@@ -40,8 +47,13 @@ def eg1():
     print(f"\nMEAN MEMORY UTILIZATION: {res[8]:.2f} MB")
     print("\n")
     
+    if out is not None:
+        sys.stdout=original_stdout
+    
     
 if __name__=="__main__":
+    print("\n")
     eg1()
+    print("\n")
     
     

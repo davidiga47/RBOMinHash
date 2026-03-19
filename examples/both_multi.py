@@ -1,13 +1,10 @@
 
 import json
-import sys
 from pathlib import Path
 import multi_run_experiment as ann
 import utilities as ut
 
 def both_multi():
-    
-    original_stdout = sys.stdout
     
     with open("ann_parameters.json", "r") as file:
         params = json.load(file)
@@ -25,12 +22,10 @@ def both_multi():
         else:
             query="file"+str(file)+".txt"
         ut.update_json("ann_parameters.json", "query", query)
-        sys.stdout=original_stdout
-        print(f"Running experiment on {query}")
-        sys.stdout=results
-        ann.eg1()
+        print(f"\nRunning experiment with query file: {query}")
+        ann.eg1(results)
     
-    sys.stdout=original_stdout
+
     results.close()
     ut.update_json("ann_parameters.json", "query", "file42.txt")
         

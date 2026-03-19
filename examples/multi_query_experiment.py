@@ -26,7 +26,7 @@ def multi_query_experiment():
             query="file"+str(file)+".txt"
         ut.update_json("ann_parameters.json", "query", query)
         sys.stdout=original_stdout
-        print(f"Running experiment on {query}")
+        print(f"Running experiment with query file: {query}")
         sys.stdout=results
         ann.eg1()
     
