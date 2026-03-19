@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sys
 import os
+import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import utilities as ut
@@ -29,7 +30,8 @@ def ann():
     
     #LSH scheme creation
     loaded=ut.load_rankings(directory)           #List of the rankings
-    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], params['seed'])  
+    seed=np.random.randint(1,1001)
+    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], seed)  
     translator=dict()   #Dict used to encode strings
     
     #Encoding and hashing of the rankings

@@ -36,7 +36,8 @@ def ann():
     loaded=ut.load_rankings(directory)           #List of the rankings
     
     #LSH scheme creation
-    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], params['seed'])  
+    seed=np.random.randint(1,1001)
+    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], seed)  
     translator=dict()   #Dict used to encode strings
     
     # Start counting building time for experiments
