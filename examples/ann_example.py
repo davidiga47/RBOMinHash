@@ -58,9 +58,11 @@ def ann():
         hashing_time += (end_hashing - start_hashing)
 
     #Isolation of the query ranking
-    query=rankings[params['query']]
-    query_index=params['query'].replace("file","")
-    query_index=int(query_index.replace(".txt",""))
+    for i,k in enumerate(rankings.keys()):
+        if k == params['query']:
+            query = rankings[k]
+            query_index = i
+            break
          
     end_building = time.perf_counter()
     build_time = end_building - start_building

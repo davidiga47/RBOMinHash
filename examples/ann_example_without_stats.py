@@ -45,9 +45,11 @@ def ann():
         lsh.add_ranking(rank)
 
     #Isolation of the query ranking
-    query=rankings[params['query']]
-    query_index=params['query'].replace("file","")
-    query_index=int(query_index.replace(".txt",""))
+    for i,k in enumerate(rankings.keys()):
+        if k == params['query']:
+            query = rankings[k]
+            query_index = i
+            break
         
     #Computation of k nearest neighbors using LSH
     neighbors=lsh.nearest_neighbors(query, params['num_neighbors']+1)
