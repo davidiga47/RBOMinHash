@@ -1,3 +1,22 @@
+NEW CHANGES 21/03/26
+
+rbo\_min\_hash.py:
+	-optimized RBO estimation by turning hash lists into numpy array
+	-added get\_rbo\_similarity\_by\_index method to estimate RBO between two rankings without knowing their hashes (used in example\rbo\_min\_hash\_example.py)
+	-optimized nearest\_neighbors using heapq library
+
+examples\ann\_example.py:
+	-added hash time measuration
+	-added query time measuration both for the LSH scheme and the traditional RBO similarity
+	-Memory utilization now considers only the memory occupied by the LSH scheme
+	
+examples\ann\_example\_without\_stats.py:
+	-copy of examples\ann\_example.py without statistics on time and memory utilization
+	-created to easily understand the structure of the ann experiment
+
+
+\----------------------------------------------------------------------\
+
 Main changes from the original DataSketch library:
 
 
