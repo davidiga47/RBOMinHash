@@ -15,7 +15,7 @@ examples\ann\_example\_without\_stats.py:
 	-created to easily understand the structure of the ann experiment
 
 
-\----------------------------------------------------------------------\
+\----------------------------------------------------------------------------------------------------
 
 Main changes from the original DataSketch library:
 
