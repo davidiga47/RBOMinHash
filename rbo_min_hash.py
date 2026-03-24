@@ -29,8 +29,6 @@ class RBO_LSH:
             
             for i in range(min(len(ranking), self.d[hash_iter])):
                 if ranking[i] not in self.r[hash_iter]:
-                    #should we generate a random integer within a very large range? like [1, (1/(1-p))**2] or larger
-                    #this would help numerical stability
                     self.r[hash_iter][ranking[i]] = self.rand_gen.random() 
                 if min_val is None or self.r[hash_iter][ranking[i]] < min_val:
                     min_val = self.r[hash_iter][ranking[i]]
