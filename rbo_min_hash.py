@@ -20,7 +20,7 @@ class RBO_LSH:
         # List of hashed ranking
         # Specifically, ranking_dataset[i] contains a list of self.num_hashes numbers corresponding to one value for each function extracted from the LSH
         self.ranking_dataset = [] 
-        self.hash_dict=[dict() for _ in range(self.num_hashes)]
+        # self.hash_dict=[dict() for _ in range(self.num_hashes)]
         
         
     def get_ranking_hash(self, ranking):
