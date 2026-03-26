@@ -1,0 +1,16 @@
+{
+  "p": 0.9,
+  "perm_len": 90,
+  "seed": 42,
+  "num_hashes": 100,
+  "dummy_data1": [1,2,7,8,9],
+  "dummy_data2": [1,2,3,4,5],
+  "string_data1": ["minhash", "is", "a", "probabilistic", "data", "structure", "for", "estimating", "the", "similarity", "between", "datasets"],
+  "string_data2": ["minhash", "is", "a", "probability", "data", "structure", "for", "estimating", "the", "similarity", "between", "documents"],
+  "data1": [24, 36, 98, 17, 47, 15, 55, 52, 28, 29, 26, 81, 76, 10, 58, 48, 88, 87, 96, 74, 7, 59, 49, 99, 23, 64, 34, 72, 27, 1],
+  "data2": [28, 71, 36, 29, 13, 68, 82, 21, 70, 86, 95, 57, 17, 10, 8, 53, 72, 47, 23, 87, 12, 49, 27, 39, 7, 15, 81, 6, 79, 99],
+  "file_data1": "file75.txt",
+  "file_data2": "file01.txt",
+  "file_directory": "./docs",
+  "directory": null
+}

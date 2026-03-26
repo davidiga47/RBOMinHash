@@ -31,7 +31,7 @@ def ann():
     #LSH scheme creation
     loaded=ut.load_rankings(directory)           #List of the rankings
     seed=np.random.randint(1,1001)
-    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], seed)  
+    lsh=rmh.RBOminHash(params["p"], params["num_hashes"], seed)  
     translator=dict()   #Dict used to encode strings
     
     #Encoding and hashing of the rankings
@@ -124,7 +124,7 @@ def eg1():
     
     #Print of the results
     print(f"QUERY FILE: {params['query']}")
-    print("PARAMETERS:\n")
+    print("\nPARAMETERS:\n")
     print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
     
     print(f"\nAPPROXIMATE NEAREST {params['num_neighbors']} NEIGHBORS FOR {params['query']}:\n")

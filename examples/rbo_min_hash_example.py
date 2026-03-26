@@ -26,7 +26,7 @@ def eg1():
     """
     
     # Parameters loading
-    with open("eg1_parameters.json", "r") as file:
+    with open("rbo_parameters.json", "r") as file:
         params = json.load(file)
         
     #extraction of the rankings
@@ -46,7 +46,7 @@ def eg1():
     seed=np.random.randint(1,1001)
     
     # Create the LSH scheme
-    lsh = rmh.RBO_LSH(params["p"],params["num_hashes"],seed)
+    lsh = rmh.RBOMinHash(params["p"],params["num_hashes"],seed)
     
     # If needed encodes the rankings
     translator=dict()
@@ -71,7 +71,7 @@ def eg1():
     print("RBO similarity for data1 and data2 is", actual_rbo)
     if p_collisions>0:
         print(f"RATIO: {actual_rbo/p_collisions}")
-        print("(Ratio should be in [1,2])")
+        # print("(Ratio should be in [1,2])")
 
 
 if __name__ == "__main__":       

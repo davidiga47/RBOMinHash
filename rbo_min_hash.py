@@ -5,7 +5,7 @@ import heapq
 
 eps=1e-5
 
-class RBO_LSH:
+class RBOMinHash:
     def __init__(self, p, num_hashes, seed):
         assert 0 < p < 1 and num_hashes > 0
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     #build LSH
     num_hashes = 200
-    lsh = RBO_LSH(p, num_hashes, 74)
+    lsh = RBOMinHash(p, num_hashes, 74)
     for ranking in ranking_dataset:
         lsh.add_ranking(ranking)
     

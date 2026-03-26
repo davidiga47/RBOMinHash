@@ -37,7 +37,7 @@ def ann():
     
     #LSH scheme creation
     seed=np.random.randint(1,1001)
-    lsh=rmh.RBO_LSH(params["p"], params["num_hashes"], seed)  
+    lsh=rmh.RBOMinHash(params["p"], params["num_hashes"], seed)  
     translator=dict()   #Dict used to encode strings
     
     # Start counting building time for experiments
@@ -165,7 +165,7 @@ def eg1():
     
     #Print of the results
     print(f"QUERY FILE: {params['query']}")
-    print("PARAMETERS:\n")
+    print("\nPARAMETERS:\n")
     print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
     
     print(f"\nAPPROXIMATE NEAREST {params['num_neighbors']} NEIGHBORS FOR {params['query']}:\n")
@@ -186,7 +186,7 @@ def eg1():
     print(f"QUERY TIME FOR THE LSH SCHEME: {query_time_lsh:.6f} seconds")
     print(f"QUERY TIME FOR THE ACTUAL RBO: {query_time_rbo:.6f} seconds")
     print(f"TOTAL ELAPSED TIME: {elapsed_time:.6f} seconds")
-    print(f"\nMEMORY UTILIZATION: {(mem_use/1024):.2f} KB")
+    print(f"\nMEMORY USED BY THE LSH SCHEME: {(mem_use/1024):.2f} KB")
     
     print("\n")
     
