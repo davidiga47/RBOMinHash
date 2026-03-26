@@ -1,6 +1,7 @@
 import numpy as np 
 from mpmath import nsum, inf
 import heapq
+# import utilities as ut
 
 eps=1e-5
 
@@ -19,6 +20,7 @@ class RBO_LSH:
         # List of hashed ranking
         # Specifically, ranking_dataset[i] contains a list of self.num_hashes numbers corresponding to one value for each function extracted from the LSH
         self.ranking_dataset = [] 
+        self.hash_dict=[dict() for _ in range(self.num_hashes)]
         
         
     def get_ranking_hash(self, ranking):
@@ -37,8 +39,8 @@ class RBO_LSH:
             #Not sure if we want to make this closer to theory, or whether this variant is reasonable in practice
             
             hashed_ranking.append(min_val)
-
-        return np.array(hashed_ranking)
+        
+        return hashed_ranking
 
     def get_rbo_similarity(self, h1, h2):
         assert len(h1) == len(h2)
@@ -55,7 +57,13 @@ class RBO_LSH:
 
     def add_ranking(self, ranking):
         hashed_ranking = self.get_ranking_hash(ranking)
-        self.ranking_dataset.append(hashed_ranking)
+        # index=len(self.ranking_dataset)
+        # for i in range(self.num_hashes):
+        #     if hashed_ranking[i] not in self.hash_dict[i].keys():
+        #         self.hash_dict[i][hashed_ranking[i]]=[index]
+        #     else:
+        #         self.hash_dict[i][hashed_ranking[i]].append(index)
+        self.ranking_dataset.append(np.array(hashed_ranking))
     
     def nearest_neighbors(self, query, k):
         hash_query = self.get_ranking_hash(query)
@@ -63,6 +71,17 @@ class RBO_LSH:
     
         return heapq.nlargest(k, ((get_sim(hash_query, hr), i) 
                                  for i, hr in enumerate(self.ranking_dataset)))
+        # neighbors=dict()
+        # for i in range(self.num_hashes):
+        #     for r in self.hash_dict[i][hash_query[i]]:
+        #         if r not in neighbors.keys():
+        #             neighbors[r]=self.get_rbo_similarity(hash_query,
+        #                                             self.ranking_dataset[r])
+        # nn=ut.top_keys(neighbors, k)
+        # res=[]
+        # for r in nn:
+        #     res.append(r)
+        # return res
     
 
 #computes the RBO similarity between lists x and y

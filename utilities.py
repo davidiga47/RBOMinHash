@@ -4,6 +4,11 @@ import string
 import random
 import json
 
+#Given a dictionary d, returns the keys of the top n values
+def top_keys(d, n):
+    return [(v,k) for k, v in sorted(d.items(),
+                                 key=lambda x: x[1], reverse=True)[:n]]
+
 #Encodes a list of non-integer values to a list of integer values
 def encode_ranking(r, translator, case_sensitive=False):
     res=[]
