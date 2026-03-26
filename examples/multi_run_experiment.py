@@ -44,7 +44,7 @@ def eg1(out=None):
     print(f"MEAN QUERY TIME FOR LSH: {res[5]:.6f} seconds")
     print(f"MEAN QUERY TIME FOR RBO: {res[6]:.6f} seconds")
     print(f"TOTAL ELAPSED TIME: {(res[4] * params['num_runs']):.6f} seconds")
-    print(f"\nMEAN MEMORY UTILIZATION: {res[8]:.2f} MB")
+    print(f"\nMEAN MEMORY UTILIZATION: {res[8]:.2f} KB")
     print("\n")
     
     if out is not None:
