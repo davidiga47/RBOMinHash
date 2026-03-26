@@ -62,20 +62,25 @@ def eg1():
     lsh.add_ranking(data2)
     # print(lsh.nearest_neighbors(data1, 2))
     
-    #Print of the results
-    print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
-    print(f"\ndata1: {print_data1}\ndata2: {print_data2}")
     p_collisions=lsh.get_rbo_similarity_by_index(0, 1)
-    print("\nEstimated probability of hashes collision for data1 and data2 is", p_collisions)
     actual_rbo = rmh.rbo_sim(data1, data2, p=params["p"])
-    print("RBO similarity for data1 and data2 is", actual_rbo)
-    if p_collisions>0:
-        print(f"RATIO: {actual_rbo/p_collisions}")
-        # print("(Ratio should be in [1,2])")
-
+    return (p_collisions, actual_rbo, print_data1, print_data2)
 
 if __name__ == "__main__":       
     print("\n")
-    eg1()
+    
+    with open("rbo_parameters.json", "r") as file:
+        params = json.load(file)
+    
+    res=eg1()
+    #Print of the results
+    print(f"Persistence: {params['p']}\nNumber of values in the hash: {params['num_hashes']}")
+    print(f"\ndata1: {res[2]}\ndata2: {res[3]}")
+    
+    print("\nEstimated probability of hashes collision for data1 and data2 is", res[0])
+    
+    print("RBO similarity for data1 and data2 is", res[1])
+    print(f"RATIO: {res[0]/res[1]}")
+    
     print("\n")
     
