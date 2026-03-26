@@ -13,5 +13,5 @@
   "file_data2": "file01.txt",
   "file_directory": "./docs",
   "directory": null,
-  "num_runs": 1000
+  "num_runs": 50
 }

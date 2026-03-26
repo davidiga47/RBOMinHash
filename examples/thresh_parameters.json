@@ -1,0 +1,20 @@
+{
+    "p": 0.9,
+    "num_hashes": 100,
+    "threshold": 0.2,
+    "query": "file42.txt",
+    "directory": "./docs",
+    "num_runs": 20,
+    "multi_query": [
+        "file00.txt",
+        "file01.txt",
+        "file02.txt",
+        "file03.txt",
+        "file04.txt",
+        "file05.txt",
+        "file06.txt",
+        "file07.txt",
+        "file08.txt",
+        "file09.txt"
+    ]
+}

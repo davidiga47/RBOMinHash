@@ -83,6 +83,11 @@ class RBOMinHash:
         #     res.append(r)
         # return res
     
+    def most_similar(self, query, threshold):
+        hash_query = self.get_ranking_hash(query)
+        get_sim = self.get_rbo_similarity
+    
+        return ((get_sim(hash_query, hr), i) for i, hr in enumerate(self.ranking_dataset) if get_sim(hash_query, hr) > threshold)
 
 #computes the RBO similarity between lists x and y
 def rbo_sim(x, y, p=0.9, k=None):
@@ -111,6 +116,15 @@ def exact_nearest_neighbor(ranking_datasets, ranking_query, p, k):
         similarity_idx_pair.append( (sim, i) )
 
     return sorted(similarity_idx_pair, reverse=True)[:k]
+
+def exact_most_similar(ranking_datasets, ranking_query, p, t):
+    similarity_idx_pair = []
+    for i, rd in enumerate(ranking_datasets):
+        sim = rbo_sim(rd, ranking_query, p=p)
+        if sim > t:
+            similarity_idx_pair.append( (sim, i) )
+
+    return sorted(similarity_idx_pair, reverse=True)
 
 if __name__ == '__main__':
     # QUICK AND DIRTY TESTING

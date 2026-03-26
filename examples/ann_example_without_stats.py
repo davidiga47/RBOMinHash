@@ -31,7 +31,7 @@ def ann():
     #LSH scheme creation
     loaded=ut.load_rankings(directory)           #List of the rankings
     seed=np.random.randint(1,1001)
-    lsh=rmh.RBOminHash(params["p"], params["num_hashes"], seed)  
+    lsh=rmh.RBOMinHash(params["p"], params["num_hashes"], seed)  
     translator=dict()   #Dict used to encode strings
     
     #Encoding and hashing of the rankings
