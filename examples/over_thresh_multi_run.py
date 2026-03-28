@@ -9,7 +9,7 @@ def run_experiment():
     
     res = [0 for _ in range(8)]
     for i in range(params['num_runs']):
-        print(f"Run #{i+1}")
+        print(f"\r{' ' * 50}\rRun #{i+1}", end="", flush=True)
         tmp = threshold.over_thresh()
         for j in range(8):
             res[j] = (res[j] * i + tmp[j]) / (i+1)
