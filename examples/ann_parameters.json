@@ -2,7 +2,19 @@
     "p": 0.9,
     "num_hashes": 100,
     "num_neighbors": 5,
-    "query": "file42.txt",
+    "query": "file02.txt",
     "directory": "./docs",
-    "num_runs": 20
+    "num_runs": 100,
+    "queries": [
+        "file01.txt",
+        "file02.txt",
+        "file03.txt",
+        "file05.txt",
+        "file08.txt",
+        "file13.txt",
+        "file21.txt",
+        "file34.txt",
+        "file55.txt",
+        "file89.txt"
+    ]
 }

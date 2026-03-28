@@ -67,7 +67,7 @@ def over_thresh():
             res,
             actual_res)
 
-def eg2():   
+def eg3():   
     
     print("\n")
     
@@ -109,5 +109,5 @@ def eg2():
     
     
 if __name__=="__main__":
-    eg2()
+    eg3()
     

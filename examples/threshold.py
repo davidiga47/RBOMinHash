@@ -81,8 +81,10 @@ def over_thresh():
             if i == elm[1]:
                 actual_res.append(file)
                 break
-    
-    recall=len(set(res) & set(actual_res))/len(set(res) | set(actual_res))
+    try:
+        recall=len(set(res) & set(actual_res))/len(set(res) | set(actual_res))
+    except ZeroDivisionError:
+        recall=0
     
     ratios=dict()           
     lsh.add_ranking(query)
@@ -107,7 +109,7 @@ def over_thresh():
             actual_res
             )
 
-def eg2():   
+def eg3():   
     
     print("\n")
     
@@ -162,5 +164,5 @@ def eg2():
     
     
 if __name__=="__main__":
-    eg2()
+    eg3()
     

@@ -17,7 +17,7 @@ def run_experiment():
     return res
     
     
-def eg1(out=None):
+def eg3_multi_run(out=None):
     
     res = run_experiment()
     
@@ -52,7 +52,7 @@ def eg1(out=None):
     
 if __name__=="__main__":
     print("\n")
-    eg1()
+    eg3_multi_run()
     print("\n")
     
     

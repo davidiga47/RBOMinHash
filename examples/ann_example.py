@@ -137,7 +137,7 @@ def ann():
             # actual_distances
             )
 
-def eg1():   
+def eg2():   
     
     print("\n")
     
@@ -192,5 +192,5 @@ def eg1():
     
     
 if __name__=="__main__":
-    eg1()
+    eg2()
     
