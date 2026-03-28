@@ -19,7 +19,7 @@ def eg3_multi_query():
     
 
     results.close()
-    ut.update_json("threshold_parameters.json", "query", original_query)
+    ut.update_json("thresh_parameters.json", "query", original_query)
         
 
 if __name__=="__main__":

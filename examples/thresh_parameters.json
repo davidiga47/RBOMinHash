@@ -2,7 +2,7 @@
     "p": 0.9,
     "num_hashes": 100,
     "threshold": 0.2,
-    "query": "file55.txt",
+    "query": "file89.txt",
     "directory": "./docs",
     "num_runs": 100,
     "queries": [
