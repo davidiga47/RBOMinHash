@@ -38,3 +38,7 @@ lsh.add_ranking(r2)
 
 sim = lsh.get_rbo_similarity(r1, r2)
 neighbors = lsh.nearest_neighbors(q, 5)
+
+For more detailed examples see the `examples` subdirectory
+[Click here for more informations about RBO](https://dl.acm.org/doi/abs/10.1145/1852102.1852106)
+[Click here for more informations about LSH](https://en.wikipedia.org/wiki/Locality-sensitive_hashing)
