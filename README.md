@@ -1,40 +1,40 @@
 # RBOMinHash
 
-**RBOMinHash** è uno schema di *Locality-Sensitive Hashing (LSH)* con distorsione progettato per la similarità **Rank-Biased Overlap (RBO)** tra ranking.
+**RBOMinHash** is a *Locality-Sensitive Hashing (LSH)* scheme with distortion for the **Rank-Biased Overlap (RBO)** similarity.
 
 ---
 
-L'implementazione principale si trova nel file rbo_min_hash.py
+The scheme is implemented as a Python class in the rbo_min_hash.py file, and consists in the following methods:
 
 ### `get_ranking_hash(r)`
-Calcola l’hash del ranking `r`.
+Computes the hash of ranking `r`.
 
 ### `get_rbo_similarity(r1, r2)`
-Stima la similarità **RBO** tra i ranking `r1` e `r2` utilizzando i loro hash.
+Estimates the **RBO** similarity between rankings `r1` and `r2` using their hashes.
 
 ### `get_rbo_similarity_by_index(i1, i2)`
-Stima la similarità **RBO** tra due ranking già presenti nello schema, identificati dagli indici `i1` e `i2`.
+Estimates the **RBO** similarity between the rankings of the scheme having indexes `i1` and `i2`.
 
 ### `add_ranking(r)`
-Aggiunge il ranking `r` allo schema calcolandone e memorizzandone l’hash.
+Adds ranking `r` to the scheme with its hash.
 
 ### `nearest_neighbors(q, k)`
-Restituisce i `k` ranking più simili (nearest neighbors) rispetto al ranking di query `q`.
+Computes the `k` nearest neighbors in the scheme for query ranking `q`.
 
 ### `most_similar(q, t)`
-Restituisce tutti i ranking nello schema con similarità RBO stimata **maggiore di una soglia `t`** rispetto al ranking `q`.
+Returns all the rankings in the scheme having estimated RBO similarity **over threshold `t`** wrt query ranking `q`.
 
 ---
 
-## Uso tipico
+## Use example
 
 ```python
 from rbo_min_hash import RBOMinHash
 
-rbomh = RBOMinHash()
+lsh = RBOMinHash()
 
-rbomh.add_ranking(r1)
-rbomh.add_ranking(r2)
+lsh.add_ranking(r1)
+lsh.add_ranking(r2)
 
-sim = rbomh.get_rbo_similarity(r1, r2)
-neighbors = rbomh.nearest_neighbors(q, k=5)
+sim = lsh.get_rbo_similarity(r1, r2)
+neighbors = lsh.nearest_neighbors(q, 5)
